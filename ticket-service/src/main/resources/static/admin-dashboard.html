@@ -4,166 +4,396 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VeloTransit - Admin Dashboard</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar { background-color: #ffffff; border-bottom: 1px solid #dee2e6; }
-        .premium-card { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 12px; }
-        .btn-primary { padding: 11px 24px; font-weight: 600; border-radius: 6px; }
-        .form-label { font-weight: 500; color: #4a5568; }
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .premium-card {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            padding: 11px 24px;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
     </style>
 </head>
-<body style="padding-top: 90px;">
+
+<body style="padding-top:90px;">
 
 <nav class="navbar navbar-expand-lg fixed-top py-3 shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold text-dark" href="#">⚙️ VeloTransit Management Panel</a>
-        <button class="btn btn-outline-danger btn-sm px-3" style="border-radius:6px;" onclick="logout()">Logout</button>
+        <a class="navbar-brand fw-bold text-dark" href="#">
+            ⚙️ VeloTransit Admin Panel
+        </a>
+
+        <button
+                class="btn btn-outline-danger btn-sm px-3"
+                onclick="logout()">
+            Logout
+        </button>
     </div>
 </nav>
 
 <div class="container py-4">
+
     <div class="mb-4 border-bottom pb-2">
-        <h2 class="fw-bold m-0">Admin Control Center</h2>
-        <p class="text-muted small">Add vehicles and organize routes for public scheduling systems maps.</p>
+        <h2 class="fw-bold m-0">
+            Admin Dashboard
+        </h2>
+
+        <p class="text-muted small">
+            Manage vehicles and routes for the booking system.
+        </p>
     </div>
 
     <div class="row">
-        <!-- Add Vehicle Action Form -->
+
+        <!-- Vehicle -->
+
         <div class="col-md-6 mb-4">
+
             <div class="premium-card p-4 h-100 shadow-sm">
-                <h4 class="fw-bold mb-4 text-primary">Add New Vehicle</h4>
+
+                <h4 class="fw-bold mb-4 text-primary">
+                    Add Vehicle
+                </h4>
+
                 <div class="mb-3">
-                    <label class="form-label">Vehicle Type (e.g., Sleeper Bus, Luxury Train)</label>
-                    <input type="text" class="form-control" id="vehicleType" placeholder="Sleeper Bus">
+                    <label class="form-label">
+                        Vehicle Type
+                    </label>
+
+                    <input
+                            id="vehicleType"
+                            type="text"
+                            class="form-control"
+                            placeholder="Sleeper Bus">
                 </div>
+
                 <div class="mb-4">
-                    <label class="form-label">Total Seat Capacity</label>
-                    <input type="number" class="form-control" id="vehicleCapacity" placeholder="30" min="1">
+                    <label class="form-label">
+                        Seat Capacity
+                    </label>
+
+                    <input
+                            id="vehicleCapacity"
+                            type="number"
+                            class="form-control"
+                            min="1"
+                            placeholder="30">
                 </div>
-                <button class="btn btn-primary w-100" onclick="addVehicle()">Save Vehicle Entry</button>
-                <div id="vehicleMsg" class="mt-3"></div>
+
+                <button
+                        class="btn btn-primary w-100"
+                        onclick="addVehicle()">
+                    Add Vehicle
+                </button>
+
+                <div
+                        id="vehicleMsg"
+                        class="mt-3">
+                </div>
+
             </div>
+
         </div>
 
-        <!-- Add Route Action Form -->
+        <!-- Route -->
+
         <div class="col-md-6 mb-4">
+
             <div class="premium-card p-4 h-100 shadow-sm">
-                <h4 class="fw-bold mb-4 text-primary">Add New Route</h4>
+
+                <h4 class="fw-bold mb-4 text-primary">
+                    Add Route
+                </h4>
+
                 <div class="mb-3">
-                    <label class="form-label">Source City</label>
-                    <input type="text" class="form-control" id="routeSource" placeholder="Mumbai">
+
+                    <label class="form-label">
+                        Source City
+                    </label>
+
+                    <input
+                            id="routeSource"
+                            type="text"
+                            class="form-control"
+                            placeholder="Mumbai">
+
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Destination City</label>
-                    <input type="text" class="form-control" id="routeDestination" placeholder="Pune">
+
+                    <label class="form-label">
+                        Destination City
+                    </label>
+
+                    <input
+                            id="routeDestination"
+                            type="text"
+                            class="form-control"
+                            placeholder="Pune">
+
                 </div>
+
                 <div class="mb-4">
-                    <label class="form-label">Assign Vehicle Asset</label>
-                    <select id="routeVehicleId" class="form-select">
-                        <option selected>Syncing vehicles dropdown...</option>
+
+                    <label class="form-label">
+                        Select Vehicle
+                    </label>
+
+                    <select
+                            id="routeVehicleId"
+                            class="form-select">
+
+                        <option selected>
+                            Loading vehicles...
+                        </option>
+
                     </select>
+
                 </div>
-                <button class="btn btn-primary w-100" onclick="addRoute()">Save Route Path</button>
-                <div id="routeMsg" class="mt-3"></div>
+
+                <button
+                        class="btn btn-primary w-100"
+                        onclick="addRoute()">
+                    Add Route
+                </button>
+
+                <div
+                        id="routeMsg"
+                        class="mt-3">
+                </div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
 <script>
-    const API_BASE_URL = 'http://localhost:8082';
 
-    if (!localStorage.getItem('jwt')) { window.location.href = 'admin-login.html'; }
+    const API_BASE_URL = "http://localhost:8082";
+
+    if (!localStorage.getItem("jwt")) {
+        window.location.href = "admin-login.html";
+    }
 
     function logout() {
-        localStorage.removeItem('jwt');
-        window.location.href = 'admin-login.html';
+        localStorage.removeItem("jwt");
+        window.location.href = "admin-login.html";
     }
+    function showAlert(elementId, type, message) {
 
-    async function loadVehiclesIntoDropdown() {
-        const vehicleSelect = document.getElementById('routeVehicleId');
-        try {
-            const res = await fetch(`${API_BASE_URL}/vehicles`);
-            if (!res.ok) throw new Error('Could not pull active vehicles repository.');
+    const container = document.getElementById(elementId);
 
-            const vehicles = await res.json();
-            vehicleSelect.innerHTML = '';
+    container.replaceChildren();
 
-            if (vehicles.length === 0) {
-                 vehicleSelect.innerHTML = '<option disabled selected>No vehicles declared yet. Add one first.</option>';
-                 return;
-            }
+    const alert = document.createElement("div");
+    alert.className = `alert alert-${type}`;
+    alert.textContent = message;
 
-            vehicles.forEach(vehicle => {
-                const option = document.createElement('option');
-                option.value = vehicle.id;
-                option.textContent = `ID ${vehicle.id}: [${vehicle.type}] (Seats Limit: ${vehicle.capacity})`;
-                vehicleSelect.appendChild(option);
-            });
-        } catch (err) {
-            vehicleSelect.innerHTML = `<option disabled selected>${err.message}</option>`;
+    container.appendChild(alert);
+}
+
+function clearSelect(selectElement) {
+    selectElement.replaceChildren();
+}
+
+async function loadVehiclesIntoDropdown() {
+
+    const vehicleSelect = document.getElementById("routeVehicleId");
+
+    clearSelect(vehicleSelect);
+
+    try {
+
+        const response = await fetch(`${API_BASE_URL}/vehicles`);
+
+        if (!response.ok) {
+            throw new Error("Unable to load vehicles.");
         }
-    }
 
-    async function addVehicle() {
-        const type = document.getElementById('vehicleType').value;
-        const capacity = document.getElementById('vehicleCapacity').value;
-        const msgEl = document.getElementById('vehicleMsg');
+        const vehicles = await response.json();
 
-        if (!type || !capacity) {
-            msgEl.innerHTML = `<div class="alert alert-danger">All field entries required.</div>`;
+        if (vehicles.length === 0) {
+
+            const option = document.createElement("option");
+            option.disabled = true;
+            option.selected = true;
+            option.textContent = "No vehicles available. Please add a vehicle first.";
+
+            vehicleSelect.appendChild(option);
             return;
         }
 
-        try {
-            const res = await fetch(`${API_BASE_URL}/vehicles`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, capacity: parseInt(capacity) })
-            });
-            if (!res.ok) throw new Error('Vehicle creation failed.');
+        vehicles.forEach(vehicle => {
 
-            const data = await res.json();
-            msgEl.innerHTML = `<div class="alert alert-success">Vehicle successfully added! Entry ID: ${data.id}</div>`;
-            document.getElementById('vehicleType').value = '';
-            document.getElementById('vehicleCapacity').value = '';
-            loadVehiclesIntoDropdown();
-        } catch (err) {
-            msgEl.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-        }
+            const option = document.createElement("option");
+
+            option.value = vehicle.id;
+            option.textContent =
+                `ID ${vehicle.id} - ${vehicle.type} (${vehicle.capacity} seats)`;
+
+            vehicleSelect.appendChild(option);
+
+        });
+
+    }
+    catch (error) {
+
+        const option = document.createElement("option");
+
+        option.disabled = true;
+        option.selected = true;
+        option.textContent = error.message;
+
+        vehicleSelect.appendChild(option);
+
     }
 
-    async function addRoute() {
-        const source = document.getElementById('routeSource').value;
-        const destination = document.getElementById('routeDestination').value;
-        const vehicleId = document.getElementById('routeVehicleId').value;
-        const msgEl = document.getElementById('routeMsg');
+}async function addVehicle() {
 
-        if (!source || !destination || !vehicleId) {
-            msgEl.innerHTML = `<div class="alert alert-danger">All field maps are required.</div>`;
-            return;
-        }
+    const type = document.getElementById("vehicleType").value.trim();
+    const capacity = document.getElementById("vehicleCapacity").value;
 
-        const routeData = { source, destination, vehicle: { id: parseInt(vehicleId) } };
-
-        try {
-            const res = await fetch(`${API_BASE_URL}/routes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(routeData)
-            });
-            if (!res.ok) throw new Error('Route assignment path mapping dropped.');
-
-            const data = await res.json();
-            msgEl.innerHTML = `<div class="alert alert-success">Route link map successfully saved! ID: ${data.id}</div>`;
-            document.getElementById('routeSource').value = '';
-            document.getElementById('routeDestination').value = '';
-        } catch (err) {
-            msgEl.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-        }
+    if (type === "" || capacity === "") {
+        showAlert(
+            "vehicleMsg",
+            "danger",
+            "Please fill in all fields."
+        );
+        return;
     }
-    document.addEventListener('DOMContentLoaded', loadVehiclesIntoDropdown);
+
+    try {
+
+        const response = await fetch(`${API_BASE_URL}/vehicles`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                type: type,
+                capacity: Number(capacity)
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Unable to add the vehicle.");
+        }
+
+        const data = await response.json();
+
+        showAlert(
+            "vehicleMsg",
+            "success",
+            `Vehicle added successfully. ID: ${data.id}`
+        );
+
+        document.getElementById("vehicleType").value = "";
+        document.getElementById("vehicleCapacity").value = "";
+
+        await loadVehiclesIntoDropdown();
+
+    }
+    catch (error) {
+
+        showAlert(
+            "vehicleMsg",
+            "danger",
+            error.message
+        );
+
+    }
+
+}async function addRoute() {
+
+    const source = document.getElementById("routeSource").value.trim();
+    const destination = document.getElementById("routeDestination").value.trim();
+    const vehicleId = document.getElementById("routeVehicleId").value;
+
+    if (source === "" || destination === "" || vehicleId === "") {
+
+        showAlert(
+            "routeMsg",
+            "danger",
+            "Please fill in all fields."
+        );
+
+        return;
+    }
+
+    try {
+
+        const response = await fetch(`${API_BASE_URL}/routes`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                source: source,
+                destination: destination,
+                vehicle: {
+                    id: Number(vehicleId)
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Unable to add the route.");
+        }
+
+        const data = await response.json();
+
+        showAlert(
+            "routeMsg",
+            "success",
+            `Route added successfully. ID: ${data.id}`
+        );
+
+        document.getElementById("routeSource").value = "";
+        document.getElementById("routeDestination").value = "";
+
+    }
+    catch (error) {
+
+        showAlert(
+            "routeMsg",
+            "danger",
+            error.message
+        );
+
+    }
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    loadVehiclesIntoDropdown
+);
+
 </script>
+
 </body>
 </html>
