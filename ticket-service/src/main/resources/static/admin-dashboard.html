@@ -13,7 +13,7 @@
         .form-label { font-weight: 500; color: #4a5568; }
     </style>
 </head>
-<body style="padding-top: 90px;">
+<body style="padding-top:90px;">
 
 <nav class="navbar navbar-expand-lg fixed-top py-3 shadow-sm">
     <div class="container">
@@ -29,141 +29,209 @@
     </div>
 
     <div class="row">
-        <!-- Add Vehicle Action Form -->
+
         <div class="col-md-6 mb-4">
             <div class="premium-card p-4 h-100 shadow-sm">
                 <h4 class="fw-bold mb-4 text-primary">Add New Vehicle</h4>
+
                 <div class="mb-3">
                     <label class="form-label">Vehicle Type (e.g., Sleeper Bus, Luxury Train)</label>
                     <input type="text" class="form-control" id="vehicleType" placeholder="Sleeper Bus">
                 </div>
+
                 <div class="mb-4">
                     <label class="form-label">Total Seat Capacity</label>
                     <input type="number" class="form-control" id="vehicleCapacity" placeholder="30" min="1">
                 </div>
+
                 <button class="btn btn-primary w-100" onclick="addVehicle()">Save Vehicle Entry</button>
+
                 <div id="vehicleMsg" class="mt-3"></div>
             </div>
         </div>
 
-        <!-- Add Route Action Form -->
         <div class="col-md-6 mb-4">
             <div class="premium-card p-4 h-100 shadow-sm">
                 <h4 class="fw-bold mb-4 text-primary">Add New Route</h4>
+
                 <div class="mb-3">
                     <label class="form-label">Source City</label>
                     <input type="text" class="form-control" id="routeSource" placeholder="Mumbai">
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Destination City</label>
                     <input type="text" class="form-control" id="routeDestination" placeholder="Pune">
                 </div>
+
                 <div class="mb-4">
                     <label class="form-label">Assign Vehicle Asset</label>
                     <select id="routeVehicleId" class="form-select">
                         <option selected>Syncing vehicles dropdown...</option>
                     </select>
                 </div>
+
                 <button class="btn btn-primary w-100" onclick="addRoute()">Save Route Path</button>
+
                 <div id="routeMsg" class="mt-3"></div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-    const API_BASE_URL = 'http://localhost:8082';
+    const API_BASE_URL = "http://localhost:8082";
 
-    if (!localStorage.getItem('jwt')) { window.location.href = 'admin-login.html'; }
+    if (!localStorage.getItem("jwt")) {
+        window.location.href = "admin-login.html";
+    }
 
     function logout() {
-        localStorage.removeItem('jwt');
-        window.location.href = 'admin-login.html';
+        localStorage.removeItem("jwt");
+        window.location.href = "admin-login.html";
+    }
+
+    function showAlert(elementId, type, message) {
+        const element = document.getElementById(elementId);
+        element.className = `alert alert-${type} mt-3`;
+        element.textContent = message;
     }
 
     async function loadVehiclesIntoDropdown() {
-        const vehicleSelect = document.getElementById('routeVehicleId');
+
+        const vehicleSelect = document.getElementById("routeVehicleId");
+
         try {
+
             const res = await fetch(`${API_BASE_URL}/vehicles`);
-            if (!res.ok) throw new Error('Could not pull active vehicles repository.');
+
+            if (!res.ok) {
+                throw new Error("Could not pull active vehicles repository.");
+            }
 
             const vehicles = await res.json();
-            vehicleSelect.innerHTML = '';
+
+            vehicleSelect.replaceChildren();
 
             if (vehicles.length === 0) {
-                 vehicleSelect.innerHTML = '<option disabled selected>No vehicles declared yet. Add one first.</option>';
-                 return;
+                const option = document.createElement("option");
+                option.disabled = true;
+                option.selected = true;
+                option.textContent = "No vehicles declared yet. Add one first.";
+                vehicleSelect.appendChild(option);
+                return;
             }
 
             vehicles.forEach(vehicle => {
-                const option = document.createElement('option');
+                const option = document.createElement("option");
                 option.value = vehicle.id;
                 option.textContent = `ID ${vehicle.id}: [${vehicle.type}] (Seats Limit: ${vehicle.capacity})`;
                 vehicleSelect.appendChild(option);
             });
+
         } catch (err) {
-            vehicleSelect.innerHTML = `<option disabled selected>${err.message}</option>`;
+
+            vehicleSelect.replaceChildren();
+
+            const option = document.createElement("option");
+            option.disabled = true;
+            option.selected = true;
+            option.textContent = err.message;
+            vehicleSelect.appendChild(option);
         }
     }
 
     async function addVehicle() {
-        const type = document.getElementById('vehicleType').value;
-        const capacity = document.getElementById('vehicleCapacity').value;
-        const msgEl = document.getElementById('vehicleMsg');
+
+        const type = document.getElementById("vehicleType").value.trim();
+        const capacity = document.getElementById("vehicleCapacity").value;
 
         if (!type || !capacity) {
-            msgEl.innerHTML = `<div class="alert alert-danger">All field entries required.</div>`;
+            showAlert("vehicleMsg", "danger", "All field entries required.");
             return;
         }
 
         try {
+
             const res = await fetch(`${API_BASE_URL}/vehicles`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, capacity: parseInt(capacity) })
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    type: type,
+                    capacity: Number(capacity)
+                })
             });
-            if (!res.ok) throw new Error('Vehicle creation failed.');
+
+            if (!res.ok) {
+                throw new Error("Vehicle creation failed.");
+            }
 
             const data = await res.json();
-            msgEl.innerHTML = `<div class="alert alert-success">Vehicle successfully added! Entry ID: ${data.id}</div>`;
-            document.getElementById('vehicleType').value = '';
-            document.getElementById('vehicleCapacity').value = '';
+
+            showAlert("vehicleMsg", "success",
+                `Vehicle successfully added! Entry ID: ${data.id}`);
+
+            document.getElementById("vehicleType").value = "";
+            document.getElementById("vehicleCapacity").value = "";
+
             loadVehiclesIntoDropdown();
+
         } catch (err) {
-            msgEl.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            showAlert("vehicleMsg", "danger", err.message);
         }
     }
 
     async function addRoute() {
-        const source = document.getElementById('routeSource').value;
-        const destination = document.getElementById('routeDestination').value;
-        const vehicleId = document.getElementById('routeVehicleId').value;
-        const msgEl = document.getElementById('routeMsg');
+
+        const source = document.getElementById("routeSource").value.trim();
+        const destination = document.getElementById("routeDestination").value.trim();
+        const vehicleId = document.getElementById("routeVehicleId").value;
 
         if (!source || !destination || !vehicleId) {
-            msgEl.innerHTML = `<div class="alert alert-danger">All field maps are required.</div>`;
+            showAlert("routeMsg", "danger", "All field maps are required.");
             return;
         }
 
-        const routeData = { source, destination, vehicle: { id: parseInt(vehicleId) } };
+        const routeData = {
+            source,
+            destination,
+            vehicle: {
+                id: Number(vehicleId)
+            }
+        };
 
         try {
+
             const res = await fetch(`${API_BASE_URL}/routes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(routeData)
             });
-            if (!res.ok) throw new Error('Route assignment path mapping dropped.');
+
+            if (!res.ok) {
+                throw new Error("Route assignment path mapping dropped.");
+            }
 
             const data = await res.json();
-            msgEl.innerHTML = `<div class="alert alert-success">Route link map successfully saved! ID: ${data.id}</div>`;
-            document.getElementById('routeSource').value = '';
-            document.getElementById('routeDestination').value = '';
+
+            showAlert("routeMsg", "success",
+                `Route link map successfully saved! ID: ${data.id}`);
+
+            document.getElementById("routeSource").value = "";
+            document.getElementById("routeDestination").value = "";
+
         } catch (err) {
-            msgEl.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            showAlert("routeMsg", "danger", err.message);
         }
     }
-    document.addEventListener('DOMContentLoaded', loadVehiclesIntoDropdown);
+
+    document.addEventListener("DOMContentLoaded", loadVehiclesIntoDropdown);
 </script>
+
 </body>
 </html>
