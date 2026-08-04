@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>VeloTransit - My Bookings</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body{
+            background:#f8f9fa;
+        }
+
+        .navbar{
+            background:#ffffff;
+            border-bottom:1px solid #dee2e6;
+        }
+
+        .card-box{
+            background:#ffffff;
+            border:1px solid #dee2e6;
+            border-radius:12px;
+        }
+
+        table{
+            vertical-align:middle;
+        }
+
+        th{
+            white-space:nowrap;
+        }
+
+    </style>
+
+</head>
+
+<body style="padding-top:90px;">
+
+<nav class="navbar navbar-expand-lg fixed-top py-3 shadow-sm">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold"
+           href="search.html">
+
+            VeloTransit
+
+        </a>
+
+        <button
+                class="btn btn-outline-danger btn-sm"
+                onclick="logout()">
+
+            Logout
+
+        </button>
+
+    </div>
+
+</nav>
+
+<div class="container py-4">
+
+    <div class="d-flex
+                justify-content-between
+                align-items-center
+                mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                My Bookings
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                View all your booked tickets.
+
+            </p>
+
+        </div>
+
+        <a href="search.html"
+           class="btn btn-outline-secondary">
+
+            Back to Routes
+
+        </a>
+
+    </div>
+
+    <div class="card-box p-4 shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover">
+
+                <thead class="table-light">
+
+                <tr>
+
+                    <th>Ticket ID</th>
+
+                    <th>From</th>
+
+                    <th>To</th>
+
+                    <th>Seat</th>
+
+                    <th>Status</th>
+
+                    <th>Booked At</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody id="bookingTableBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div id="message"
+             class="mt-3">
+        </div>
+
+    </div>
+
+</div><script>
+
+    const API_BASE_URL = "http://localhost:8081";
+
+    const token = localStorage.getItem("jwt");
+
+    if (!token) {
+        window.location.href = "login.html";
+    }
+
+    function logout() {
+
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("username");
+
+        window.location.href = "login.html";
+
+    }
+
+    function clearNode(node) {
+        node.replaceChildren();
+    }
+
+    function showMessage(type, message) {
+
+        const messageBox = document.getElementById("message");
+
+        clearNode(messageBox);
+
+        const alert = document.createElement("div");
+
+        alert.className = `alert alert-${type}`;
+
+        alert.textContent = message;
+
+        messageBox.appendChild(alert);
+
+    }
+
+    function formatDate(dateString) {
+
+        const date = new Date(dateString);
+
+        return date.toLocaleString();
+
+    }
+
+    async function loadBookings() {
+
+        const tableBody = document.getElementById("bookingTableBody");
+
+        clearNode(tableBody);
+
+        try {
+
+            const response = await fetch(
+                `${API_BASE_URL}/tickets/my`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to load your bookings.");
+            }
+
+            const bookings = await response.json();        if (bookings.length === 0) {
+
+            showMessage(
+                "info",
+                "You have not booked any tickets yet."
+            );
+
+            return;
+        }
+
+        bookings.forEach(booking => {
+
+            const row = document.createElement("tr");
+
+            const ticketId = document.createElement("td");
+            ticketId.textContent = booking.ticketId;
+
+            const source = document.createElement("td");
+            source.textContent = booking.source;
+
+            const destination = document.createElement("td");
+            destination.textContent = booking.destination;
+
+            const seat = document.createElement("td");
+            seat.textContent = booking.seatNo;
+
+            const status = document.createElement("td");
+
+            const badge = document.createElement("span");
+
+            badge.className =
+                booking.status === "BOOKED"
+                    ? "badge bg-success"
+                    : "badge bg-secondary";
+
+            badge.textContent = booking.status;
+
+            status.appendChild(badge);
+
+            const bookingTime = document.createElement("td");
+            bookingTime.textContent =
+                formatDate(booking.bookingTime);
+
+            row.appendChild(ticketId);
+            row.appendChild(source);
+            row.appendChild(destination);
+            row.appendChild(seat);
+            row.appendChild(status);
+            row.appendChild(bookingTime);
+
+            tableBody.appendChild(row);
+
+        });    } catch (error) {
+
+        showMessage(
+            "danger",
+            error.message
+        );
+
+    }
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    loadBookings
+);
+
+</script>
+
+</body>
+
+</html>

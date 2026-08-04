@@ -6,7 +6,7 @@ import com.example.transport.ticket.model.Ticket;
 import com.example.transport.ticket.repository.TicketRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // <-- Required Import
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +53,7 @@ public class BookingService {
                 .routeId(routeId)
                 .seatNo(seatNo)
                 .status("BOOKED")
+                .bookingTime(LocalDateTime.now())
                 .build();
 
         return Optional.of(ticketRepository.save(newTicket));

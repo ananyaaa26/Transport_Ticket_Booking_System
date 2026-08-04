@@ -6,6 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+
     List<Ticket> findByRouteId(Long routeId);
-    boolean existsByRouteIdAndSeatNo(Long routeId, String seatNo);
+
+    List<Ticket> findByUserId(Long userId);
+
+    boolean existsByRouteIdAndSeatNo(Long routeId,String seatNo);
+
 }

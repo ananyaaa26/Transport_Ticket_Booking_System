@@ -44,46 +44,99 @@
     </div>
 </div>
 <script>
+
     async function login() {
-      const msgEl = document.getElementById('msg');
-      msgEl.innerText = '';
-      try {
-        const res = await fetch('http://localhost:8081/login', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-              username: document.getElementById('username').value,
-              password: document.getElementById('password').value
-          })
-        });
-        const responseText = await res.text();
-        let data = {};
-        if (responseText) {
-            try { data = JSON.parse(responseText); } catch(jsonErr) {}
-        }
-        if (!res.ok) {
-            if (data.message === "Username not found!" || data.message === "Wrong password!") {
-                throw new Error(data.message);
+
+        const msgEl = document.getElementById("msg");
+
+        msgEl.innerText = "";
+
+        const username = document.getElementById("username").value.trim();
+
+        const password = document.getElementById("password").value;
+
+        try {
+
+            const res = await fetch("http://localhost:8081/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+
+            });
+
+            const responseText = await res.text();
+
+            let data = {};
+
+            if (responseText) {
+
+                try {
+
+                    data = JSON.parse(responseText);
+
+                } catch (e) {}
+
             }
-            if (res.status === 401 || res.status === 403) {
-                throw new Error("Incorrect username or password. Please try again.");
+
+            if (!res.ok) {
+
+                if (
+                    res.status === 401 ||
+                    res.status === 403
+                ) {
+
+                    throw new Error(
+                        "Incorrect username or password. Please try again."
+                    );
+
+                }
+
+                throw new Error(
+                    "Unable to connect to the server right now."
+                );
+
             }
-            throw new Error("Unable to connect to the server right now.");
+
+            if (data.token) {
+
+                localStorage.setItem("jwt", data.token);
+
+                localStorage.setItem("username", username);
+
+                if (data.role === "ROLE_ADMIN") {
+
+                    window.location.href = "admin-dashboard.html";
+
+                } else {
+
+                    window.location.href = "search.html";
+
+                }
+
+            } else {
+
+                throw new Error(
+                    "Access token missing from response."
+                );
+
+            }
+
+        } catch (e) {
+
+            msgEl.innerText = e.message;
+
         }
-        if (data.token) {
-          localStorage.setItem('jwt', data.token);
-          if (data.role === 'ROLE_ADMIN') {
-              window.location.href = 'admin-dashboard.html';
-          } else {
-              window.location.href = 'search.html';
-          }
-        } else {
-            throw new Error('Access token missing from response context.');
-        }
-      } catch(e) {
-        msgEl.innerText = e.message;
-      }
+
     }
+
 </script>
 </body>
 </html>

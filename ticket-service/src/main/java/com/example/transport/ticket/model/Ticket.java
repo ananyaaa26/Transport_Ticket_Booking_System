@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "tickets")
 @Data
@@ -13,11 +15,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Ticket {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable =false)
     private Long userId;
 
     @Column(name = "route_id", nullable = false)
@@ -27,5 +30,9 @@ public class Ticket {
     private String seatNo;
 
     @Column(nullable = false)
-    private String status; // e.g., "BOOKED", "CANCELLED"
+    private String status;
+
+    @Column(name = "booking_time", nullable = false)
+    private LocalDateTime bookingTime;
+
 }
