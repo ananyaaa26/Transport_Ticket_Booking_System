@@ -3,99 +3,253 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>VeloTransit - Booking Confirmed</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    :root {
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text-dark: #0f172a;
-      --brand-blue: #2563eb;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
+
+    :root{
+      --bg-main:#f8fafc;
+      --card-bg:#ffffff;
+      --text-dark:#0f172a;
+      --brand-blue:#2563eb;
+      --text-muted:#64748b;
+      --border-color:#e2e8f0;
     }
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-dark);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    body{
+      background:var(--bg-main);
+      color:var(--text-dark);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     }
-    .confirmation-container {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
+
+    .confirmation-container{
+      background:var(--card-bg);
+      border:1px solid var(--border-color);
+      border-radius:16px;
     }
-    .pass-header {
-      background-color: #fafafa;
-      border-bottom: 1px dashed var(--border-color);
+
+    .pass-header{
+      background:#fafafa;
+      border-bottom:1px dashed var(--border-color);
     }
-    .btn-return {
-      background-color: var(--brand-blue); color: #ffffff; padding:12px; border-radius:8px; font-weight:600; text-decoration:none; display:block; text-align:center; transition: all 0.2s;
+
+    .btn-return{
+      background:var(--brand-blue);
+      color:#ffffff;
+      padding:12px;
+      border-radius:8px;
+      font-weight:600;
+      text-decoration:none;
+      display:block;
+      text-align:center;
+      transition:.2s;
     }
-    .btn-return:hover { background-color: #1d4ed8; color: #ffffff; }
+
+    .btn-return:hover{
+      background:#1d4ed8;
+      color:#ffffff;
+    }
+
   </style>
+
 </head>
+
 <body>
+
 <div class="container py-5">
+
   <div class="row justify-content-center">
+
     <div class="col-md-5">
+
       <div class="confirmation-container shadow-sm overflow-hidden mt-5">
 
         <div class="pass-header p-4 text-center">
-          <span class="badge bg-success-subtle text-success border border-success-subtle mb-2 px-3 py-2 text-uppercase font-monospace fw-bold" style="font-size:0.75rem;">Booking Confirmed</span>
-          <h4 class="fw-bold m-0 tracking-tight text-dark">Ticket Receipt Voucher</h4>
+
+          <span
+                  class="badge bg-success-subtle text-success border border-success-subtle mb-2 px-3 py-2 text-uppercase fw-bold"
+                  style="font-size:.75rem;">
+
+              Booking Confirmed
+
+          </span>
+
+          <h4 class="fw-bold m-0 text-dark">
+
+            Your Ticket
+
+          </h4>
+
         </div>
 
         <div class="card-body p-4">
-          <p class="text-center text-muted small mb-4">Your ticket reservation pass details are updated below.</p>
 
-          <div id="ticket-details" class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid var(--border-color);">
-            <div class="text-center py-2"><div class="spinner-border text-primary spinner-border-sm"></div></div>
+          <p class="text-center text-muted small mb-4">
+
+            Your booking has been confirmed.
+
+          </p>
+
+          <div
+                  id="ticket-details"
+                  class="p-4 rounded-3 mb-4"
+                  style="background:#f8fafc;border:1px solid var(--border-color);">
+
+            <div class="text-center py-2">
+
+              <div class="spinner-border text-primary spinner-border-sm"></div>
+
+            </div>
+
           </div>
 
-          <a class="btn btn-return shadow-sm" href="search.html">Return to Dashboard</a>
+          <a
+                  class="btn btn-return shadow-sm"
+                  href="search.html">
+
+            Back to Routes
+
+          </a>
+
         </div>
 
       </div>
-    </div>
-  </div>
-</div>
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const ticketId = urlParams.get('ticketId');
-  const token = localStorage.getItem('jwt');
 
-  if (!token || !ticketId) { window.location.href = 'login.html'; }
+    </div>
+
+  </div>
+
+</div><script>
+
+  const API_BASE_URL = "http://localhost:8081";
+
+  const params = new URLSearchParams(window.location.search);
+
+  const ticketId = params.get("ticketId");
+  const token = localStorage.getItem("jwt");
+
+  const details = document.getElementById("ticket-details");
+
+  if (!token || !ticketId) {
+      window.location.href = "login.html";
+  }
+
+  function clearNode(node) {
+      node.replaceChildren();
+  }
+
+  function showError(message) {
+
+      clearNode(details);
+
+      const alert = document.createElement("div");
+      alert.className = "alert alert-danger m-0 small";
+      alert.textContent = message;
+
+      details.appendChild(alert);
+
+  }
+
+  function createField(colClass, label, value, valueClass) {
+
+      const column = document.createElement("div");
+      column.className = colClass;
+
+      const title = document.createElement("span");
+      title.className =
+          "text-uppercase text-muted small d-block mb-1";
+      title.textContent = label;
+
+      const content = document.createElement("strong");
+      content.className = valueClass;
+      content.textContent = value;
+
+      column.appendChild(title);
+      column.appendChild(content);
+
+      return column;
+
+  }
 
   async function loadTicket() {
-    const detailsEl = document.getElementById('ticket-details');
-    try {
-        const res = await fetch(`http://localhost:8081/tickets/${ticketId}`, {
-            headers: {'Authorization': 'Bearer ' + token}
-        });
-        if (!res.ok) throw new Error('Voucher verification timed out.');
 
-        const data = await res.json();
-        detailsEl.innerHTML = `
-            <div class="row g-3">
-              <div class="col-6 mb-2">
-                <span class="text-uppercase font-monospace text-muted small d-block mb-1">Ticket ID</span>
-                <strong class="text-dark fs-5">#${data.id}</strong>
-              </div>
-              <div class="col-6 mb-2">
-                <span class="text-uppercase font-monospace text-muted small d-block mb-1">Route ID</span>
-                <strong class="text-dark fs-5">${data.routeId}</strong>
-              </div>
-              <div class="col-12 border-top pt-3">
-                <span class="text-uppercase font-monospace text-muted small d-block mb-1">Allocated Seat Matrix</span>
-                <span class="fs-2 fw-bold text-primary">${data.seatNo}</span>
-              </div>
-            </div>
-        `;
-    } catch(e) {
-        detailsEl.innerHTML = `<div class="alert alert-danger m-0 small">${e.message}</div>`;
-    }
+      try {
+
+          const response = await fetch(
+              `${API_BASE_URL}/tickets/${ticketId}`,
+              {
+                  headers: {
+                      Authorization: `Bearer ${token}`
+                  }
+              }
+          );
+
+          if (!response.ok) {
+              throw new Error(
+                  "Unable to load your booking details."
+              );
+          }
+
+          const ticket = await response.json();
+
+          clearNode(details);
+
+          const row = document.createElement("div");
+          row.className = "row g-3";
+
+          row.appendChild(
+              createField(
+                  "col-6 mb-2",
+                  "Ticket ID",
+                  `#${ticket.id}`,
+                  "text-dark fs-5"
+              )
+          );
+
+          row.appendChild(
+              createField(
+                  "col-6 mb-2",
+                  "Route ID",
+                  ticket.routeId,
+                  "text-dark fs-5"
+              )
+          );
+
+          const seat = document.createElement("div");
+          seat.className = "col-12 border-top pt-3";
+
+          const seatLabel = document.createElement("span");
+          seatLabel.className =
+              "text-uppercase text-muted small d-block mb-1";
+          seatLabel.textContent = "Seat Number";
+
+          const seatValue = document.createElement("span");
+          seatValue.className =
+              "fs-2 fw-bold text-primary";
+          seatValue.textContent = ticket.seatNo;
+
+          seat.appendChild(seatLabel);
+          seat.appendChild(seatValue);
+
+          row.appendChild(seat);
+
+          details.appendChild(row);
+
+      }
+      catch (error) {
+
+          showError(error.message);
+
+      }
+
   }
-  document.addEventListener('DOMContentLoaded', loadTicket);
+
+  document.addEventListener(
+      "DOMContentLoaded",
+      loadTicket
+  );
+
 </script>
-</body>
-</html>
