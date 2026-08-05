@@ -83,9 +83,7 @@
             </h2>
 
             <p class="text-muted mb-0">
-
-                View all your booked tickets.
-
+                View your booking history.
             </p>
 
         </div>
@@ -158,31 +156,25 @@
 
     }
 
-    function clearNode(node) {
-        node.replaceChildren();
-    }
+    function showMessage(type, text) {
 
-    function showMessage(type, message) {
+        const message = document.getElementById("message");
 
-        const messageBox = document.getElementById("message");
-
-        clearNode(messageBox);
+        message.innerHTML = "";
 
         const alert = document.createElement("div");
 
         alert.className = `alert alert-${type}`;
 
-        alert.textContent = message;
+        alert.textContent = text;
 
-        messageBox.appendChild(alert);
+        message.appendChild(alert);
 
     }
 
-    function formatDate(dateString) {
+    function formatDate(date) {
 
-        const date = new Date(dateString);
-
-        return date.toLocaleString();
+        return new Date(date).toLocaleString();
 
     }
 
@@ -190,7 +182,7 @@
 
         const tableBody = document.getElementById("bookingTableBody");
 
-        clearNode(tableBody);
+        tableBody.innerHTML = "";
 
         try {
 
@@ -204,76 +196,83 @@
             );
 
             if (!response.ok) {
-                throw new Error("Unable to load your bookings.");
+                throw new Error("Unable to load bookings.");
             }
 
-            const bookings = await response.json();        if (bookings.length === 0) {
+            const bookings = await response.json();
 
-            showMessage(
-                "info",
-                "You have not booked any tickets yet."
-            );
+            if (bookings.length === 0) {
 
-            return;
+                showMessage(
+                    "info",
+                    "You haven't booked any tickets yet."
+                );
+
+                return;
+
+            }
+
+            bookings.forEach(booking => {
+
+                const tr = document.createElement("tr");
+
+                const ticketId = document.createElement("td");
+                ticketId.textContent = booking.ticketId;
+
+                const source = document.createElement("td");
+                source.textContent = booking.source;
+
+                const destination = document.createElement("td");
+                destination.textContent = booking.destination;
+
+                const seat = document.createElement("td");
+                seat.textContent = booking.seatNo;
+
+                const status = document.createElement("td");
+
+                const badge = document.createElement("span");
+
+                badge.className =
+                    booking.status === "BOOKED"
+                        ? "badge bg-success"
+                        : "badge bg-secondary";
+
+                badge.textContent = booking.status;
+
+                status.appendChild(badge);
+
+                const bookedAt = document.createElement("td");
+                bookedAt.textContent =
+                    formatDate(booking.bookingTime);
+
+                tr.appendChild(ticketId);
+                tr.appendChild(source);
+                tr.appendChild(destination);
+                tr.appendChild(seat);
+                tr.appendChild(status);
+                tr.appendChild(bookedAt);
+
+                tableBody.appendChild(tr);
+
+            });
+
         }
 
-        bookings.forEach(booking => {
+        catch (error) {
 
-            const row = document.createElement("tr");
+            showMessage(
+                "danger",
+                error.message
+            );
 
-            const ticketId = document.createElement("td");
-            ticketId.textContent = booking.ticketId;
-
-            const source = document.createElement("td");
-            source.textContent = booking.source;
-
-            const destination = document.createElement("td");
-            destination.textContent = booking.destination;
-
-            const seat = document.createElement("td");
-            seat.textContent = booking.seatNo;
-
-            const status = document.createElement("td");
-
-            const badge = document.createElement("span");
-
-            badge.className =
-                booking.status === "BOOKED"
-                    ? "badge bg-success"
-                    : "badge bg-secondary";
-
-            badge.textContent = booking.status;
-
-            status.appendChild(badge);
-
-            const bookingTime = document.createElement("td");
-            bookingTime.textContent =
-                formatDate(booking.bookingTime);
-
-            row.appendChild(ticketId);
-            row.appendChild(source);
-            row.appendChild(destination);
-            row.appendChild(seat);
-            row.appendChild(status);
-            row.appendChild(bookingTime);
-
-            tableBody.appendChild(row);
-
-        });    } catch (error) {
-
-        showMessage(
-            "danger",
-            error.message
-        );
+        }
 
     }
 
-}
-
-document.addEventListener(
-    "DOMContentLoaded",
-    loadBookings
-);
+    document.addEventListener(
+        "DOMContentLoaded",
+        loadBookings
+    );
 
 </script>
 

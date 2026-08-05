@@ -12,12 +12,14 @@ import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.example.transport.ticket.dto.BookingConfirmationResponse;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/tickets")
@@ -42,26 +44,71 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<?> bookTicket(
+    public ResponseEntity<?> bookTickets(
             @RequestBody BookRequest request,
             Authentication authentication
     ) {
 
         User user = (User) authentication.getPrincipal();
 
-        Optional<Ticket> newTicket = bookingService.bookTicket(
-                user.getId(),
-                request.getRouteId(),
-                request.getSeatNo()
-        );
+        try {
 
-        return newTicket
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() ->
-                        ResponseEntity.badRequest().body(
-                                Map.of("error", "Seat not available or route is full.")
-                        )
-                );
+            List<Ticket> tickets = bookingService.bookTickets(
+                    user.getId(),
+                    request.getRouteId(),
+                    request.getSeatNos()
+            );
+            RouteDTO route =
+                    vehicleServiceClient
+                            .getRouteById(request.getRouteId())
+                            .orElse(null);
+
+            BookingConfirmationResponse response =
+                    BookingConfirmationResponse.builder()
+
+                            .ticketIds(
+                                    tickets.stream()
+                                            .map(Ticket::getId)
+                                            .toList()
+                            )
+
+                            .routeId(request.getRouteId())
+                            .source(
+                                    route != null
+                                            ? route.getSource()
+                                            : "-"
+                            )
+
+                            .destination(
+                                    route != null
+                                            ? route.getDestination()
+                                            : "-"
+                            )
+
+                            .seats(
+                                    tickets.stream()
+                                            .map(Ticket::getSeatNo)
+                                            .toList()
+                            )
+
+                            .bookingTime(
+                                    tickets.get(0).getBookingTime()
+                            )
+
+                            .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "error",
+                            e.getMessage()
+                    ));
+
+        }
+
     }
 
     @GetMapping("/{id}")
@@ -118,8 +165,13 @@ public class TicketController {
         List<BookingResponse> bookings = ticketRepository.findAll()
                 .stream()
                 .sorted(
-                        Comparator.comparing(Ticket::getBookingTime)
-                                .reversed()
+                        Comparator.comparing(
+                                Ticket::getBookingTime,
+                                Comparator.reverseOrder()
+                        ).thenComparing(
+                                Ticket::getId,
+                                Comparator.reverseOrder()
+                        )
                 )
                 .map(ticket -> {
 
@@ -174,8 +226,13 @@ public class TicketController {
                 .findByUserId(currentUser.getId())
                 .stream()
                 .sorted(
-                        Comparator.comparing(Ticket::getBookingTime)
-                                .reversed()
+                        Comparator.comparing(
+                                Ticket::getBookingTime,
+                                Comparator.reverseOrder()
+                        ).thenComparing(
+                                Ticket::getId,
+                                Comparator.reverseOrder()
+                        )
                 )
                 .map(ticket -> {
 
@@ -220,7 +277,8 @@ public class TicketController {
 
         private Long routeId;
 
-        private String seatNo;
+        private List<String> seatNos;
 
     }
-}
+
+    }

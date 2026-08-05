@@ -6,6 +6,7 @@ import com.example.transport.ticket.repository.UserRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -69,17 +70,36 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public Map<String, String> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> register(
+            @RequestBody AuthRequest request
+    ) {
+
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
+
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "message",
+                            "Username already exists."
+                    )
+            );
+
         }
+
         User newUser = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("ROLE_USER")
                 .build();
+
         userRepository.save(newUser);
-        return Map.of("message", "User registered successfully");
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message",
+                        "User registered successfully."
+                )
+        );
+
     }
 
     @Data
